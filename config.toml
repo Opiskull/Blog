@@ -1,0 +1,75 @@
+baseURL = "/"
+languageCode = "en"
+title = "Opiskulls blog"
+theme = "hugo-nuo"
+enableRobotsTXT = true
+PygmentsCodeFences = true
+canonifyurls = true
+
+# Disqus Username
+disqusShortname = "opiskull"
+
+# Google Analytics UA number
+googleAnalytics = "UA-115788437-1"
+
+# Copyright of your post
+copyright = "© 2018"
+
+# Initial site menu, you can extend menu with content.
+[[menu.main]]
+  name = "Home"
+  weight = 10
+  identifier = "home"
+  url = "/"
+
+[[menu.main]]
+  name = "Projects"
+  weight = 20
+  identifier = "projects"
+  url = "https://github.com/opiskull"
+
+[[menu.main]]
+  name = "Tags"
+  weight = 30
+  identifier = "tags"
+  url = "/tags/"
+
+# Add your own params here
+[params]
+  author = "Opiskull"
+  avatar = "/img/avatar.png"
+  seotitle = "Blog"
+  subtitle = "Yay my blog"
+  description = "Hi this is Opiskull and here is my blog where I write about my projects!"
+  paginate = 10
+
+  # Choose your social networks
+  email = "opi@peerzone.net"
+  github = "opiskull"
+  # twitter = "twitter_username"
+  # linkedin = "linkedin_username"
+  # weibo = "weibo_username"
+  # wechat= "/img/qrcode.jpg" # Replace with your wechat qrcode image
+  # facebook = "facebook_username"
+  # google = "googlplus_id_number"
+  # instagram = "instagram_username"
+  # youtube = "youtube_username"
+  # vimeo = "vimeo_username"
+  # medium = "medium_username"
+  # quora = "quora_username"
+  # pinterest = "pinterest_username"
+  # dribbble = "dribbble_username"
+  # behance = "behance_username"
+  # jsfiddle = "jsfiddle_username"
+  # codepen = "codepen_username"
+  # zhihu = "zhihu_username"
+  # douban = "douban_username"
+  # bilibili = "bilibili_id_number"
+
+  # Google Webmaster
+  # https://www.google.com/webmasters/
+  # googleSiteVerification = "_moDmnnBNVLBN1rzNxyGUGdPHE20YgbmrtzLIbxaWFc"
+
+  # Bing Webmaster
+  # https://www.bing.com/toolbox/webmaster/
+  # msValidate = "22596E34341DD1D17D6022C44647E587"
