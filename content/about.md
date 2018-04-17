@@ -8,7 +8,7 @@ weight: 50
 
 Hi!
 
-My name is Christian Onuk and I'm from Austria. 
+My name is Christian Onuk and I am from Styria (that is in Austria). 
 
 In this blog I write about all things that I work on and try out that have to do with Programming, IT and computers.
 
