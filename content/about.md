@@ -12,6 +12,6 @@ My name is Christian Onuk and I'm from Austria.
 
 In this blog I write about all things that I work on and try out that have to do with Programming, IT and computers.
 
-I'm interested in the following programming languages: Javascript, Typescript, Golang and C#.
+I'm interested in the following programming languages: JavaScript, Typescript, Golang and C#.
 
 So have fun on my blog and I hope you find something interesting for you!
