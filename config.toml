@@ -38,8 +38,8 @@ copyright = "© 2018"
 [params]
   author = "Opiskull"
   avatar = "/img/avatar.png"
-  seotitle = "Blog"
-  subtitle = "Yay my blog"
+  seotitle = "Opiskulls Blog"
+  subtitle = "A blog about `computer stuff`"
   description = "Hi this is Opiskull and here is my blog where I write about my projects!"
   paginate = 10
 
