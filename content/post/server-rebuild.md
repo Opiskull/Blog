@@ -6,23 +6,42 @@ date: 2018-04-22T20:54:21+02:00
 draft: true
 ---
 
-Some weeks ago I upgraded my Server with some new hardware. So I had to setup the server. With getting a new server I also thought about using some new technologie with it. So I tried to setup the server only with docker components.
+Some weeks ago I upgraded my Server with some new hardware. So I had to setup the server. With getting a new server I also thought about using some new technology with it. So I tried to setup the server only with Docker containers.
 
-# First to 4th try
-At first I tried to setup kubernetes since every big cloud hoster is now using kubernetes. I got it work after my 3rd try. The setup of kubernetes is rather complex :(.
-So after I got it to work I tried to setup teamspeak as my first container... the bad thing was... that there is no kubernetes image available for teamspeak... so I tried to build one from scratch but really failed badly :D.
+# Kubernetes with Docker
+At first I tried to setup Kubernetes since many large cloud platforms (Azure, Amazon...) are embracing Kubernetes. I got it work after my 3rd try. Kubernetes is rather complex :( although there exists well written documentation it is still a little challenge to set it up correctly.
+So after I got it to work I tried to setup Teamspeak as my first container. 
 
-After this I finally understood that I don't need the complexity of kubernetes because I only got one server. Kubernetes doesn't really make sense on one server.
+I searched for an Kubernetes image of Teamspeak, but found none.
+Next I tried to write my own Kubernetes file/image... I tried to build it from scratch but really failed badly. 
 
-# Lets go Docker only
+After this I finally understood that I tried to do too much at once. I don't need the complexity of Kubernetes since I only got one server. Kubernetes doesn't really make sense on one server. 
 
-Now I setup a server with docker only. Ubuntu already got a prebuild package from Docker, which made the installation really easy.
+Maybe I should have thought about this sooner when I had to enable the master for the deployment of pods with the following command:
 
 `
-apt-get install docker
+kubectl taint nodes --all node-role.kubernetes.io/master-
 `
 
-I used the following services with existing images.
+# Lets try only Docker
+
+Now that I failed with Kubernetes lets go with Docker only. That should be easier and I already had some experience with Docker. I only did the tutorial at their site https://docs.docker.com/get-started/ but it counts as experience right? :P
+
+Now I setup a server with docker only. My host system is Ubuntu so followed the instructions on https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce.
+
+`
+apt-get update && apt-get install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+`
+
+After the above lines i could simply update and install the docker-ce version.
+
+`
+apt-get update && apt-get install docker-ce
+`
+
+Now that Docker is running lets create our containers and Images that we need!
 
 ## Teamspeak
 
