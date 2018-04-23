@@ -6,21 +6,21 @@ date: 2018-04-22T20:54:21+02:00
 draft: true
 ---
 
-Some weeks ago I upgraded my Server with some new hardware. So i had to setup the server. The whole thought of setting up my new server i thought about
-
-As always when you get something new you want todo something with it. So i tried to setup the server only with docker components.
+Some weeks ago I upgraded my Server with some new hardware. So I had to setup the server. With getting a new server I also thought about using some new technologie with it. So I tried to setup the server only with docker components.
 
 # First to 4th try
-on my first try i tried to setup kubernetes as every big cloud hoster is now using kubernetes. I got it work after my 3rd try. The setup of kubernetes is really not easy :(.
-So after i got it to work i tried to setup teamspeak as my first server... the bad thing was... that there is no kubernetes image available for teamspeak... so i tried to build one from scratch but really failed badly :D.
+At first I tried to setup kubernetes since every big cloud hoster is now using kubernetes. I got it work after my 3rd try. The setup of kubernetes is rather complex :(.
+So after I got it to work I tried to setup teamspeak as my first container... the bad thing was... that there is no kubernetes image available for teamspeak... so I tried to build one from scratch but really failed badly :D.
 
-After this i finally understood that i don't need the complexity of kubernetes as i only have one server. So Kubernetes doesn't really make sense on one server.
+After this I finally understood that I don't need the complexity of kubernetes because I only got one server. Kubernetes doesn't really make sense on one server.
 
 # Lets go Docker only
 
-Now i setup a server with docker only. 
+Now I setup a server with docker only. Ubuntu already got a prebuild package from Docker, which made the installation really easy.
 
-
+`
+apt-get install docker
+`
 
 I used the following services with existing images.
 
