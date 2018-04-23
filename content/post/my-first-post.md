@@ -27,11 +27,11 @@ In this small example we will try to get an NGINX server to run in some simple s
 
 With this command we create a container with the name **static-nginx**.
 
-With **-v D:/dev/sample-app:/usr/share/nginx/html:ro** we share the **D:/dev/sample-app** folder from the host with the container with the name **/usr/share/nginx/html** in read only mode as we only need to read from this folder
+With `-v D:/dev/sample-app:/usr/share/nginx/html:ro` we share the `D:/dev/sample-app` folder from the host with the container with the name `/usr/share/nginx/html` in read only mode as we only need to read from this folder
 
 With the **-d** switch we let it run in the background
 
-And with **nginx** we say what image name. Normally a image name starts with a name like  **opiskull/getting-started** bug NGINX is used directly.
+And with **Nginx** we say what image name. Normally a image name starts with a name like `opiskull/getting-started` bug NGINX is used directly.
 
 
 
