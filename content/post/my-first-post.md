@@ -1,7 +1,7 @@
 ---
 title: "My First Post"
 date: 2018-03-05T21:19:50+01:00
-tags: ["Docker","Tech","nginx","DevOps"]
+tags: ["Docker","Tech","Nginx","DevOps"]
 ---
 
 # My First Post
@@ -25,13 +25,13 @@ In this small example we will try to get an NGINX server to run in some simple s
 
 `docker run --name static-nginx -v D:/dev/sample-app:/usr/share/nginx/html:ro -d nginx`
 
-With this command we create a container with the name **static-nginx**.
+With this command we create a container with the name `static-nginx`.
 
 With `-v D:/dev/sample-app:/usr/share/nginx/html:ro` we share the `D:/dev/sample-app` folder from the host with the container with the name `/usr/share/nginx/html` in read only mode as we only need to read from this folder
 
-With the **-d** switch we let it run in the background
+With the `-d` switch we let it run in the background
 
-And with **Nginx** we say what image name. Normally a image name starts with a name like `opiskull/getting-started` bug NGINX is used directly.
+And with `nginx` we say what image name. Normally a image name starts with a name like `opiskull/getting-started` bug NGINX is used directly.
 
 
 
