@@ -41,7 +41,7 @@ After the above lines I could simply update and install the `docker-ce` version.
 apt-get update && apt-get install docker-ce
 ```
 
-Now that Docker is running lets create our containers and Images that we need!
+Now that Docker is running lets create our containers and images that we need!
 
 ## TeamSpeak
 
@@ -53,7 +53,9 @@ What should I do now? Why don't I create an Image myself that parses the TeamSpe
 
 Yup lets do that. So I started to write an script to open the website and parse the website and get the latest version ;)
 
-I used an small app with the name pup https://github.com/ericchiang/pup and a little curl magic to download the website of TeamSpeak. The result was a small one-liner with the following content
+I used an small app with the name `pup` https://github.com/ericchiang/pup and a little `curl` magic to download the website of TeamSpeak. With `pup` I can simply execute CSS-Queries against a file and parse the file and get the download URL for the TeamSpeak server. I preferred `pup` over something like `jq` as I only need to copy the file and execute it without any installation required. So everyone can download it and simply start the application.
+
+The result was a small one-liner with the following content
 
 ```bash
 curl -s -L https://www.teamspeak.com/en/downloads | pup "[href*=\"teamspeak3-server_linux_amd64\"] attr{href}"
@@ -61,9 +63,9 @@ curl -s -L https://www.teamspeak.com/en/downloads | pup "[href*=\"teamspeak3-ser
 
 After the execution the result is the download URL like we wanted `http://dl.4players.de/ts/releases/3.1.1/teamspeak3-server_linux_amd64-3.1.1.tar.bz2`
 
-You need to escape the " in the script above in the pup call as this is a bug. I tried it at first with single quotes (') but these do not work!
+You need to escape the " in the script above in the pup call as this is a bug with `pup`. I tried it at first with single quotes (') but these do not work!
 
-And now download the server with curl again:
+Now lets download the server with curl again:
 
 ```bash
 curl -O -L $(curl -s -L https://www.teamspeak.com/en/downloads | pup "[href*=\"teamspeak3-server_linux_amd64\"] attr{href}")

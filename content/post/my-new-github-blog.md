@@ -1,5 +1,5 @@
 ---
-title: "My Second Post"
+title: "My new GitHub blog"
 author: "Opiskull"
 tags: ["Hugo", "Blog"]
 date: 2018-03-14T20:55:27+01:00
