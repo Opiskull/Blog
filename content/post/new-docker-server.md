@@ -10,9 +10,9 @@ Some weeks ago I upgraded my Server with some new hardware. So I had to setup th
 
 # Kubernetes with Docker
 At first I tried to setup Kubernetes since many large cloud platforms (Azure, Amazon...) are embracing Kubernetes. I got it work after my 3rd try. Kubernetes is rather complex :( although there exists well written documentation it is still a little challenge to set it up correctly.
-So after I got it to work I tried to setup Teamspeak as my first container. 
+So after I got it to work I tried to setup TeamSpeak as my first container. 
 
-I searched for an Kubernetes image of Teamspeak, but found none.
+I searched for an Kubernetes image of TeamSpeak, but found none.
 Next I tried to write my own Kubernetes file/image... I tried to build it from scratch but really failed badly. 
 
 After this I finally understood that I tried to do too much at once. I don't need the complexity of Kubernetes since I only got one server. Kubernetes doesn't really make sense on one server. 
@@ -27,7 +27,7 @@ kubectl taint nodes --all node-role.kubernetes.io/master-
 
 Now that I failed with Kubernetes lets go with Docker only. That should be easier and I already had some experience with Docker. I only did the tutorial at their site https://docs.docker.com/get-started/ but it counts as experience right? :P
 
-Now I setup a server with docker only. My host system is Ubuntu so followed the instructions on https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce.
+Now I setup a server with Docker only. My host system is Ubuntu so followed the instructions on https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce.
 
 ```bash
 apt-get update && apt-get install apt-transport-https ca-certificates curl software-properties-common
@@ -43,17 +43,17 @@ apt-get update && apt-get install docker-ce
 
 Now that Docker is running lets create our containers and Images that we need!
 
-## Teamspeak
+## TeamSpeak
 
-On the old server was a Teamspeak server that I needed to move to the new Server. I had already created a backup before from the old server. On the old Server I had Teamspeak running without problems but I never really liked it. It was a pain to upgrade... and I didn't really have any idea what I was doing.
+On the old server was a TeamSpeak server that I needed to move to the new Server. I had already created a backup before from the old server. On the old Server I had TeamSpeak running without problems but I never really liked it. It was a pain to upgrade... and I didn't really have any idea what I was doing.
 
 At first I tried to use an existing image but somehow didn't like how it was setup (it had an dependency on an external service for getting the latest version number).
 
-What should I do now? Why don't I create an Image myself that parses the Teamspeak website and always downloads the latest server?
+What should I do now? Why don't I create an Image myself that parses the TeamSpeak website and always downloads the latest server?
 
 Yup lets do that. So I started to write an script to open the website and parse the website and get the latest version ;)
 
-I used an small app with the name pup https://github.com/ericchiang/pup and a little curl magic to download the website of Teamspeak. The result was a small oneliner with the following content
+I used an small app with the name pup https://github.com/ericchiang/pup and a little curl magic to download the website of TeamSpeak. The result was a small one-liner with the following content
 
 ```bash
 curl -s -L https://www.teamspeak.com/en/downloads | pup "[href*=\"teamspeak3-server_linux_amd64\"] attr{href}"
@@ -77,11 +77,11 @@ Lets add extraction to our target folder:
 mkdir -p /home/teamspeak && curl -L $(curl -s -L https://www.teamspeak.com/en/downloads | pup "[href*=\"teamspeak3-server_linux_amd64\"] attr{href}") | tar xj -C /home/teamspeak
 ```
 
-Now I also needed to add pup to the image. pup was only available from github with a zip file. So i added unzip when I created the image unzip pup to the `/bin` folder and make it executable with `cmod a+x /bin/pup`.
+Now I also needed to add pup to the image. pup was only available from GitHub with a zip file. So I added unzip when I created the image unzip pup to the `/bin` folder and make it executable with `cmod a+x /bin/pup`.
 
-So... now I was at a point where i thought i got it to work finally... But somehow... I asked myself again why does no good image exist for Teamspeak. I searched the docker-hub again and found it. My holy grail!! a official docker image of teamspeak!!! 
+So... now I was at a point where I got it to work finally... But somehow... I asked myself again why does no good image exist for TeamSpeak. I searched the Docker-hub again and found it. My holy grail!! a official Docker image of TeamSpeak!!! 
 
-I removed all the files in my docker image... and removed all my work i had done until now... Yeah... that wasn't such a good idea... I also removed my `Dockerfile`... So i cannot post it now...
+I removed all the files in my Docker image... and removed all my work I had done until now... Yeah... that wasn't such a good idea... I also removed my `Dockerfile`... So I cannot post it now...
 
 I created a `docker-compose.yaml` file with the following content
 
@@ -110,7 +110,7 @@ So... What have I learned from this. Sometimes it is a good idea to look for som
 
 What is a server without a game server? ;D
 
-One of my next projects was to setup a Minecraft server. That was relatively easy :) there exists a really really good image from itzg https://hub.docker.com/r/itzg/minecraft-server/
+One of my next projects was to setup a Minecraft server. That was relatively easy :) there exists a really really good image from `itzg` https://hub.docker.com/r/itzg/minecraft-server/
 
 So I created a simple `docker-compose.yaml` file for starting a Minecraft server :)
 
@@ -137,19 +137,19 @@ services:
     restart: always
 ```
 
-I removed some parts from the config as those are internal :)
+I removed some parts from the configuration as those are internal :)
 
-## Mailserver
+## Mail server
 
-On my old server I setup a mailserver from hand and always hat problems with postfix and could never really send emails correctly... The setup was somehow complicated and didn't work as it should ;)
+On my old server I setup a mail server from hand and always hat problems with postfix and could never really send emails correctly... The setup was somehow complicated and didn't work as it should ;)
 
 So with this server I really had to use a preconfigured server so that updates would be easier and error prune. So I decided to use a Docker image with containers.
 
-There where some really interesting Docker mailserver out there. I used the mailserver from https://github.com/tomav/docker-mailserver. I really have to say it was really pleasant to work with and really good examples on how to use the services it provides.
+There where some really interesting Docker mail server out there. I used the mail server from https://github.com/tomav/docker-mailserver. I really have to say it was really pleasant to work with and really good examples on how to use the services it provides.
 
 ### First steps
 
-I followed the information as provided on the readme page on the docker-mailserver:
+I followed the information as provided on the readme page on the `docker-mailserver`:
 
 ```bash
 docker pull tvial/docker-mailserver:latest
@@ -177,15 +177,15 @@ And it worked! IT REALLY WORKED :D. So that is why I really love this image ;D
 
 ### DKIM
 
-Domain validation on Namecheap
+Domain validation on NameCheap
 
-### Autodiscover/Autoconfig
+### Auto discover/Auto configuration
 
-Another nice feature I found was that autodiscover was also supported... I didn't even know that something like that exists ;). That is really really a nice feature... as i always failed add configuring my email cliet correctly.
+Another nice feature I found was that auto discover was also supported... I didn't even know that something like that exists ;). That is really really a nice feature... as I always failed add configuring my email client correctly.
 
 As always for this also exists an nice image. This time I used  `weboaks/autodiscover-email-settings:latest`
 
-That part of my docker-compose looked like that:
+That part of my `docker-compose` looked like that:
 
 ```yml
   autodiscover:
@@ -207,11 +207,11 @@ That part of my docker-compose looked like that:
     restart: always
 ```
 
-I used traefik as my reverse proxy of choice as it is easy to manage and use. We can simply use labels to set the correct parts of traefik to forward how it should.
+I used Traefik as my reverse proxy of choice as it is easy to manage and use. We can simply use labels to set the correct parts of Traefik to forward how it should.
 
 ### WebMail
 
-My webmail interface of choice was rainloop. I already used it before and liked how easy it was to setup and configure. This time I used `hardware/rainloop`
+My webmail interface of choice was RainLoop. I already used it before and liked how easy it was to setup and configure. This time I used `hardware/rainloop`
 
 ```yml
   web:
@@ -229,25 +229,25 @@ My webmail interface of choice was rainloop. I already used it before and liked 
     restart: always
 ```
 
-That image really needed no configuration at all only my configuration for traefik.
+That image really needed no configuration at all only my configuration for Traefik.
 
 ## Blog
 
-Hosted on github. 
+Hosted on GitHub. 
 Created with Hugo. 
-Webhook golang.
+Web hook written with `golang`.
 
 ## Reverse Proxy
 
-A reverse proxy is required so that multiple services can be used. as in my case the mailserver and my blog itself.
+A reverse proxy is required so that multiple services can be used. as in my case the mail server and for the blog.
 
 ### Nginx 
 
-First i tried to setup the reverse proxy with nginx and docker-gen from jwilder. The image was nice and worked...
+First I tried to setup the reverse proxy with Nginx and docker-gen from `jwilder`. The image was nice and worked...
 
-but somehow i wanted something else.
+but somehow I wanted something else.
 
 ### Traefik
-Traefik is a nice and modern reverse proxy with the possibillity to read from the docker itself. We can configure the port and names that should be used with labels.
+Traefik is a nice and modern reverse proxy with the possibility to read from the Docker itself. We can configure the port and names that should be used with labels.
 
 
