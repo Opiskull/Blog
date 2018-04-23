@@ -19,9 +19,9 @@ After this I finally understood that I tried to do too much at once. I don't nee
 
 Maybe I should have thought about this sooner when I had to enable the master for the deployment of pods with the following command:
 
-`
+```bash
 kubectl taint nodes --all node-role.kubernetes.io/master-
-`
+```
 
 # Lets try only Docker
 
@@ -29,39 +29,213 @@ Now that I failed with Kubernetes lets go with Docker only. That should be easie
 
 Now I setup a server with docker only. My host system is Ubuntu so followed the instructions on https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce.
 
-`
+```bash
 apt-get update && apt-get install apt-transport-https ca-certificates curl software-properties-common
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-`
+```
 
-After the above lines i could simply update and install the docker-ce version.
+After the above lines I could simply update and install the `docker-ce` version.
 
-`
+```bash
 apt-get update && apt-get install docker-ce
-`
+```
 
 Now that Docker is running lets create our containers and Images that we need!
 
 ## Teamspeak
 
-On the old server was a teamspeak server that i needed to move over to the new server and that worked really good.
+On the old server was a Teamspeak server that I needed to move to the new Server. I had already created a backup before from the old server. On the old Server I had Teamspeak running without problems but I never really liked it. It was a pain to upgrade... and I didn't really have any idea what I was doing.
 
-With the teamspeak server i needed to invest some of my time. First i tried to build it from stretch... But that didn't work... after one day searching i finally found the official teamspeak server image and that was really easy to integrate. I Setup my docker-compose.yml script with the licence in it and it worked on the first try.
+At first I tried to use an existing image but somehow didn't like how it was setup (it had an dependency on an external service for getting the latest version number).
+
+What should I do now? Why don't I create an Image myself that parses the Teamspeak website and always downloads the latest server?
+
+Yup lets do that. So I started to write an script to open the website and parse the website and get the latest version ;)
+
+I used an small app with the name pup https://github.com/ericchiang/pup and a little curl magic to download the website of Teamspeak. The result was a small oneliner with the following content
+
+```bash
+curl -s -L https://www.teamspeak.com/en/downloads | pup "[href*=\"teamspeak3-server_linux_amd64\"] attr{href}"
+```
+
+After the execution the result is the download URL like we wanted `http://dl.4players.de/ts/releases/3.1.1/teamspeak3-server_linux_amd64-3.1.1.tar.bz2`
+
+You need to escape the " in the script above in the pup call as this is a bug. I tried it at first with single quotes (') but these do not work!
+
+And now download the server with curl again:
+
+```bash
+curl -O -L $(curl -s -L https://www.teamspeak.com/en/downloads | pup "[href*=\"teamspeak3-server_linux_amd64\"] attr{href}")
+```
+
+With this we can download our server each time an new image is created!
+
+Lets add extraction to our target folder:
+
+```bash
+mkdir -p /home/teamspeak && curl -L $(curl -s -L https://www.teamspeak.com/en/downloads | pup "[href*=\"teamspeak3-server_linux_amd64\"] attr{href}") | tar xj -C /home/teamspeak
+```
+
+Now I also needed to add pup to the image. pup was only available from github with a zip file. So i added unzip when I created the image unzip pup to the `/bin` folder and make it executable with `cmod a+x /bin/pup`.
+
+So... now I was at a point where i thought i got it to work finally... But somehow... I asked myself again why does no good image exist for Teamspeak. I searched the docker-hub again and found it. My holy grail!! a official docker image of teamspeak!!! 
+
+I removed all the files in my docker image... and removed all my work i had done until now... Yeah... that wasn't such a good idea... I also removed my `Dockerfile`... So i cannot post it now...
+
+I created a `docker-compose.yaml` file with the following content
+
+```yml
+version: "3"
+services:
+  teamspeak:
+    image: teamspeak
+    ports:
+      - "9987:9987/udp"
+      - "10011:10011"
+      - "30033:30033"
+    volumes:
+      - "/home/teamspeak:/var/ts3server"
+    restart: always
+```
+
+I am using the `/home/teamspeak` directory because I need to migrate my files from the old server to the new one with all the files and with a license.
+
+relatively unspectacular right? :/
+
+So... What have I learned from this. Sometimes it is a good idea to look for something 2 times before rebuilding something from scratch ;D
+
 
 ## Minecraft
 
-official minecraft image
+What is a server without a game server? ;D
+
+One of my next projects was to setup a Minecraft server. That was relatively easy :) there exists a really really good image from itzg https://hub.docker.com/r/itzg/minecraft-server/
+
+So I created a simple `docker-compose.yaml` file for starting a Minecraft server :)
+
+```yml
+version: '3'
+
+services:
+  minecraft:
+    image: itzg/minecraft-server
+    container_name: minecraft
+    ports:
+      - "25565:25565"
+    volumes:
+      - /home/minecraft:/data
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      EULA: "TRUE"
+      CONSOLE: "false"
+      ENABLE_RCON: "true"
+      RCON_PORT: 28016
+      UID: 1001
+      GID: 1001
+      MOTD: "Opiskulls minecraft server powered by Docker"
+    restart: always
+```
+
+I removed some parts from the config as those are internal :)
 
 ## Mailserver
 
-setup the mailserver
-additional add rainloop as an webmail client
-used mailserver and added rainloop with nginx server as the webserver
+On my old server I setup a mailserver from hand and always hat problems with postfix and could never really send emails correctly... The setup was somehow complicated and didn't work as it should ;)
+
+So with this server I really had to use a preconfigured server so that updates would be easier and error prune. So I decided to use a Docker image with containers.
+
+There where some really interesting Docker mailserver out there. I used the mailserver from https://github.com/tomav/docker-mailserver. I really have to say it was really pleasant to work with and really good examples on how to use the services it provides.
+
+### First steps
+
+I followed the information as provided on the readme page on the docker-mailserver:
+
+```bash
+docker pull tvial/docker-mailserver:latest
+```
+
+```bash
+curl -o setup.sh https://raw.githubusercontent.com/tomav/docker-mailserver/master/setup.sh; chmod a+x ./setup.sh
+curl -o docker-compose.yml https://raw.githubusercontent.com/tomav/docker-mailserver/master/docker-compose.yml.dist
+curl -o .env https://raw.githubusercontent.com/tomav/docker-mailserver/master/.env.dist
+```
+
+Configure the environment as I needed and created my email account with
+
+```bash
+./setup.sh email add <user@domain> [<password>]
+```
+
+So now I started up my server
+
+```bash
+docker-compose up
+```
+
+And it worked! IT REALLY WORKED :D. So that is why I really love this image ;D
+
+### DKIM
+
+Domain validation on Namecheap
+
+### Autodiscover/Autoconfig
+
+Another nice feature I found was that autodiscover was also supported... I didn't even know that something like that exists ;). That is really really a nice feature... as i always failed add configuring my email cliet correctly.
+
+As always for this also exists an nice image. This time I used  `weboaks/autodiscover-email-settings:latest`
+
+That part of my docker-compose looked like that:
+
+```yml
+  autodiscover:
+    image: weboaks/autodiscover-email-settings:latest
+    container_name: mail_autodiscover
+    environment:
+    - DOMAIN=peerzone.net
+    - IMAP_HOST=imap.peerzone.net
+    - IMAP_PORT=993
+    - SMTP_HOST=smtp.peerzone.net
+    - SMTP_PORT=587
+    labels:
+      - traefik.enable=true
+      - traefik.port=8000
+      - traefik.frontend.rule=Host:autoconfig.peerzone.net,autodiscover.peerzone.net
+      - traefik.docker.network=traefik-net
+    networks:
+    - traefik-net
+    restart: always
+```
+
+I used traefik as my reverse proxy of choice as it is easy to manage and use. We can simply use labels to set the correct parts of traefik to forward how it should.
+
+### WebMail
+
+My webmail interface of choice was rainloop. I already used it before and liked how easy it was to setup and configure. This time I used `hardware/rainloop`
+
+```yml
+  web:
+    image: hardware/rainloop
+    container_name: mail_web
+    labels:
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:mail.peerzone.net
+      - traefik.port=8888
+      - traefik.docker.network=traefik-net
+    volumes:
+      - mail_web_data:/rainloop/data
+    networks:
+    - traefik-net
+    restart: always
+```
+
+That image really needed no configuration at all only my configuration for traefik.
 
 ## Blog
 
-Hosted on github. Created with Hugo. Webhook golang.
+Hosted on github. 
+Created with Hugo. 
+Webhook golang.
 
 ## Reverse Proxy
 
