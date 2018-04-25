@@ -3,7 +3,7 @@ title: "New Server with Docker"
 author: "Opiskull"
 tags: ["Docker", "Server", "Kubernetes", "MineCraft", "TeamSpeak", "Docker-Compose"]
 date: 2018-04-22T20:54:21+02:00
-draft: true
+draft: false
 ---
 
 Some weeks ago I upgraded my Server with some new hardware. So I had to setup the server. With getting a new server I also thought about using some new technology with it. So I tried to setup the server only with Docker containers.
