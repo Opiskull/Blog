@@ -2,7 +2,7 @@
 title: "New Server with Docker"
 author: "Opiskull"
 tags: ["Docker", "Server", "Kubernetes", "MineCraft", "TeamSpeak", "Docker-Compose"]
-date: 2018-04-22T20:54:21+02:00
+date: 2018-04-25T20:54:21+02:00
 draft: false
 ---
 
