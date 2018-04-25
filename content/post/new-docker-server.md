@@ -141,6 +141,43 @@ services:
 
 I removed some parts from the configuration as those are internal :)
 
+## Reverse Proxy
+
+A reverse proxy is required so that multiple services can be used with different subdomains like blog.example.com, www.example.com...
+
+### Nginx 
+
+First I tried to setup the reverse proxy with Nginx and docker-gen from `jwilder`. The image was nice and worked...
+
+but somehow I wanted something else.
+
+### Traefik
+Traefik is a nice and modern reverse proxy with the possibility to reload when a new container is started or a label changed. Traefik is really nice to be used with docker as it can be configured with labels of docker containers. It is used like in the following `docker-compose.yml` file.
+
+```yaml
+version: "3"
+services:
+  webserver:
+    image: nginx
+    labels:
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:hooks.example.com
+      - traefik.port=9000
+      - traefik.docker.network=traefik-net
+    networks:
+      - traefik-net
+networks:
+  traefik-net:
+    external: true
+```
+
+Lets explain the labels a little bit
+* traefik.enable is set to enable Traefik for this container
+* traefik.frontend.rule is used for the routing
+* traefik.port is used to define what port Traefik should forward the traffic to
+* traefik.docker.network is the network that is used for the routing
+  * In my case I created the traefik-net network as external so that I can share it between all my `docker-compose.yml` files
+
 ## Mail server
 
 On my old server I setup a mail server from hand and always hat problems with postfix and could never really send emails correctly... The setup was somehow complicated and didn't work as it should ;)
@@ -194,15 +231,15 @@ That part of my `docker-compose` looked like that:
     image: weboaks/autodiscover-email-settings:latest
     container_name: mail_autodiscover
     environment:
-    - DOMAIN=peerzone.net
-    - IMAP_HOST=imap.peerzone.net
+    - DOMAIN=example.com
+    - IMAP_HOST=imap.example.com
     - IMAP_PORT=993
-    - SMTP_HOST=smtp.peerzone.net
+    - SMTP_HOST=smtp.example.com
     - SMTP_PORT=587
     labels:
       - traefik.enable=true
       - traefik.port=8000
-      - traefik.frontend.rule=Host:autoconfig.peerzone.net,autodiscover.peerzone.net
+      - traefik.frontend.rule=Host:autoconfig.example.com,autodiscover.example.com
       - traefik.docker.network=traefik-net
     networks:
     - traefik-net
@@ -221,7 +258,7 @@ My webmail interface of choice was RainLoop. I already used it before and liked 
     container_name: mail_web
     labels:
       - traefik.enable=true
-      - traefik.frontend.rule=Host:mail.peerzone.net
+      - traefik.frontend.rule=Host:mail.example.com
       - traefik.port=8888
       - traefik.docker.network=traefik-net
     volumes:
@@ -233,23 +270,100 @@ My webmail interface of choice was RainLoop. I already used it before and liked 
 
 That image really needed no configuration at all only my configuration for Traefik.
 
+The complicated part was to setup all the records for my domain with mailconf, autodicover and so on...
+
 ## Blog
 
-Hosted on GitHub. 
-Created with Hugo. 
-Web hook written with `golang`.
+My blog is generated with [Hugo](https://gohugo.io/) a static site generator. With that I don't need to setup PHP or something else and without one of these there are also no security problems. The content of the blog is in a Git-Repository that is hosted on GitHub https://github.com/Opiskull/blog.
 
-## Reverse Proxy
+The idea behind this setup was to publish ah new version of the blog on each commit. For that to work I needed to setup a web hook with a little script to build the site.
+As the webhook server I searched for a solution in Go and found one [adnanh/webhook](https://github.com/adnanh/webhook). Another good thing about that library was that someone already build a docker-image [almir/webhook](https://hub.docker.com/r/almir/webhook/) that could be used as a base.
 
-A reverse proxy is required so that multiple services can be used. as in my case the mail server and for the blog.
 
-### Nginx 
+Here is `publish-blog.sh` that clones the folder into the `/src` directory and starts `hugo` with the `/output` destination after that.
 
-First I tried to setup the reverse proxy with Nginx and docker-gen from `jwilder`. The image was nice and worked...
+```bash
+#!/bin/bash
+BLOG_FOLDER="/src/blog"
+if test ! -d $BLOG_FOLDER
+then
+  git clone https://github.com/opiskull/blog.git $BLOG_FOLDER
+else
+  cd $BLOG_FOLDER && git pull origin
+fi
+rm -r /output/*
+cd $BLOG_FOLDER && hugo --destination="/output"
+```
 
-but somehow I wanted something else.
+I used the following `hooks.yaml.tmpl` file. In the trigger rule I added the GITHUB_SECRET so that no everybody can start the hook.
 
-### Traefik
-Traefik is a nice and modern reverse proxy with the possibility to read from the Docker itself. We can configure the port and names that should be used with labels.
+```yaml
+- id: publish-blog
+  execute-command: "/hooks/publish-blog.sh"
+  response-message: Publish Blog
+  response-headers:
+  - name: Access-Control-Allow-Origin
+    value: '*'
+  trigger-rule:
+    match:
+     type: payload-hash-sha1
+     secret: "{{ getenv "GITHUB_SECRET" }}"
+     parameter:
+       source: header
+       name: X-Hub-Signature
+```
+
+I used the following `docker-compose.yaml` file that also sets the `GITHUB_SECRET` we need to set for the hook. I also integrated a `nginx:alpine` container for hosting all the static files that were generated with Hugo into the `/output` folder from the `publish-blog.sh` script. 
+
+```yaml
+version: "3"
+services:
+  webhook:
+    image: opiskull/webhook
+    container_name: blog_webhook
+    volumes:
+      - src-data:/src
+      - output-data:/output
+      - ./hooks:/hooks
+    environment:
+      - GITHUB_SECRET=mygithubsecret
+    labels:
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:hooks.example.com
+      - traefik.port=9000
+      - traefik.docker.network=traefik-net
+    networks:
+      - traefik-net
+    restart: always
+  webfiles:
+    image: nginx:alpine
+    container_name: blog_webfiles
+    volumes:
+      - output-data:/usr/share/nginx/html
+    labels:
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:blog.example.com
+      - traefik.port=80
+      - traefik.docker.network=traefik-net
+    networks:
+      - traefik-net
+    restart: always
+volumes:
+  src-data: {}
+  output-data: {}
+networks:
+  traefik-net:
+    external: true
+```
+
+And with everything above now I have a running blog with the content from a GitHub repository.
+
+So I think this should have been everything :)
+
+See you next time :D
+
+
+
+
 
 
