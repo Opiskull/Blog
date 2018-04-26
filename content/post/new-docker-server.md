@@ -9,15 +9,15 @@ draft: false
 Some weeks ago I upgraded my Server with some new hardware. So I had to setup the server. With getting a new server I also thought about using some new technology with it. So I tried to setup the server only with Docker containers.
 
 # Kubernetes with Docker
-At first I tried to setup Kubernetes since many large cloud platforms (Azure, Amazon...) are embracing Kubernetes. I got it work after my 3rd try. Kubernetes is rather complex :( although there exists well written documentation it is still a little challenge to set it up correctly.
-So after I got it to work I tried to setup TeamSpeak as my first container. 
+At first I tried to setup Kubernetes since many large cloud platforms (Azure, Amazon...) are embracing Kubernetes. It worked after my 3rd try. Kubernetes is rather complex :( although there exists well written documentation it is still a little challenge to set it up correctly.
+So after it worked I tried to setup TeamSpeak as my first container. 
 
-I searched for an Kubernetes image of TeamSpeak, but found none.
+I searched for a Kubernetes image of TeamSpeak, but found none.
 Next I tried to write my own Kubernetes file/image... I tried to build it from scratch but really failed badly. 
 
-After this I finally understood that I tried to do too much at once. I don't need the complexity of Kubernetes since I only got one server. Kubernetes doesn't really make sense on one server. 
+After this, I finally understood that I tried to do too much at once. I don't need the complexity of Kubernetes since I only got one server. Kubernetes doesn't really make sense on one server. 
 
-Maybe I should have thought about this sooner when I had to enable the master for the deployment of pods with the following command:
+Maybe, I should have thought about this sooner when I had to enable the master for the deployment of pods with the following command:
 
 ```bash
 kubectl taint nodes --all node-role.kubernetes.io/master-
@@ -276,7 +276,7 @@ The complicated part was to setup all the records for my domain with mailconf, a
 
 My blog is generated with [Hugo](https://gohugo.io/) a static site generator. With that I don't need to setup PHP or something else and without one of these there are also no security problems. The content of the blog is in a Git-Repository that is hosted on GitHub https://github.com/Opiskull/blog.
 
-The idea behind this setup was to publish ah new version of the blog on each commit. For that to work I needed to setup a web hook with a little script to build the site.
+The idea behind this setup was to publish a new version of the blog on each commit. For that to work I needed to setup a web hook with a little script to build the site.
 As the webhook server I searched for a solution in Go and found one [adnanh/webhook](https://github.com/adnanh/webhook). Another good thing about that library was that someone already build a docker-image [almir/webhook](https://hub.docker.com/r/almir/webhook/) that could be used as a base.
 
 
